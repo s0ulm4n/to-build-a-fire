@@ -1,0 +1,97 @@
+[gd_scene load_steps=12 format=3 uid="uid://gp1sicvtn6sn"]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_pl5ui"]
+[ext_resource type="Texture2D" uid="uid://brk1qfejblw31" path="res://sprites/player/sprite_1.png" id="2_3v0tx"]
+[ext_resource type="Texture2D" uid="uid://3nlx2khmdqkt" path="res://sprites/player/sprite_2.png" id="3_sfyl8"]
+[ext_resource type="Texture2D" uid="uid://vra4y02tu2hx" path="res://sprites/player/sprite_3.png" id="4_qidut"]
+[ext_resource type="Texture2D" uid="uid://kadwtq36goua" path="res://sprites/player/sprite_4.png" id="5_fcmlk"]
+[ext_resource type="Texture2D" uid="uid://dvl7kovn5ttlf" path="res://sprites/effects/2d_light.webp" id="6_k4wsj"]
+[ext_resource type="Shader" path="res://shaders/main.gdshader" id="7_h3bxm"]
+[ext_resource type="AudioStream" uid="uid://buoi4xub0y6kq" path="res://sfx/snow_steps_sfx.mp3" id="8_mk5hy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2roa"]
+size = Vector2(16, 29)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8wvkn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_3v0tx")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_sfyl8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_qidut")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_fcmlk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_3v0tx")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lf0tl"]
+shader = ExtResource("7_h3bxm")
+shader_parameter/rain_amount = 200.0
+shader_parameter/near_rain_length = 0.1
+shader_parameter/far_rain_length = 0.05
+shader_parameter/near_rain_width = 0.5
+shader_parameter/far_rain_width = 0.5
+shader_parameter/near_rain_transparency = 1.0
+shader_parameter/far_rain_transparency = 0.25
+shader_parameter/rain_color = Color(0.8, 0.8, 0.8, 1)
+shader_parameter/base_rain_speed = 0.8
+shader_parameter/additional_rain_speed = 0.8
+shader_parameter/slant = 0.9
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_pl5ui")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1.5)
+shape = SubResource("RectangleShape2D_x2roa")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_8wvkn")
+animation = &"walk"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)
+
+[node name="ActionCooldownTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+texture = ExtResource("6_k4wsj")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_lf0tl")
+offset_left = -384.0
+offset_top = -216.0
+offset_right = -344.0
+offset_bottom = -176.0
+scale = Vector2(19.2188, 10.8029)
+color = Color(0, 0, 0, 0)
+
+[node name="FootprintTimer" type="Timer" parent="."]
+wait_time = 0.3
+autostart = true
+
+[node name="FootstepsSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_mk5hy")
+volume_db = -3.0
+parameters/looping = true
+
+[connection signal="timeout" from="FootprintTimer" to="." method="_on_footprint_timer_timeout"]

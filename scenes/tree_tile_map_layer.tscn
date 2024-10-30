@@ -1,0 +1,48 @@
+[gd_scene load_steps=9 format=3 uid="uid://4v7d3ljfhual"]
+
+[ext_resource type="Texture2D" uid="uid://6lcjtjf0x81d" path="res://sprites/trees/Tree_0.png" id="1_wq772"]
+[ext_resource type="Texture2D" uid="uid://mv5x0d4m7i3x" path="res://sprites/trees/Tree_2.png" id="2_e56kf"]
+[ext_resource type="Script" path="res://scripts/tree_tile_map_layer.gd" id="3_4q0cu"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ybuns"]
+texture = ExtResource("1_wq772")
+texture_region_size = Vector2i(33, 57)
+1:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-10.875, -3.875, 10.25, -3.625, 10.375, 18, -10.75, 18)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_no51o"]
+texture = ExtResource("2_e56kf")
+texture_region_size = Vector2i(33, 57)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-11.75, -3.25, 11.625, -3.375, 11.25, 17.875, -11.5, 17.875)
+1:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_v6c3o"]
+occlusion_layer_0/light_mask = 1
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_ybuns")
+sources/1 = SubResource("TileSetAtlasSource_no51o")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wl3ha"]
+seed = 9
+frequency = 0.02
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xanig"]
+width = 32
+height = 32
+noise = SubResource("FastNoiseLite_wl3ha")
+
+[node name="TreeTileMapLayer" type="TileMapLayer"]
+z_index = -1
+tile_set = SubResource("TileSet_v6c3o")
+script = ExtResource("3_4q0cu")
+noise_texture = SubResource("NoiseTexture2D_xanig")

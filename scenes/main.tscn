@@ -1,0 +1,69 @@
+[gd_scene load_steps=13 format=3 uid="uid://dhxwpnd5f444r"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_c8m17"]
+[ext_resource type="PackedScene" uid="uid://by2kummhq5p56" path="res://scenes/fire.tscn" id="3_bhkb7"]
+[ext_resource type="PackedScene" uid="uid://gp1sicvtn6sn" path="res://scenes/player.tscn" id="4_6a7ae"]
+[ext_resource type="PackedScene" uid="uid://n30lpni08dal" path="res://scenes/footprint.tscn" id="4_edlff"]
+[ext_resource type="PackedScene" uid="uid://d4j3dc8tcx45c" path="res://scenes/hud.tscn" id="5_apr6c"]
+[ext_resource type="Texture2D" uid="uid://dxbxntugdfurn" path="res://sprites/snow/Snow_1.png" id="6_3vuup"]
+[ext_resource type="PackedScene" uid="uid://dig75g1rtafay" path="res://scenes/log.tscn" id="6_ef13q"]
+[ext_resource type="PackedScene" uid="uid://4v7d3ljfhual" path="res://scenes/tree_tile_map_layer.tscn" id="7_hai6q"]
+[ext_resource type="AudioStream" uid="uid://bpntr0rl5qsku" path="res://sfx/blizzard_sfx.mp3" id="9_l4rno"]
+[ext_resource type="AudioStream" uid="uid://c2dvhjckd8q54" path="res://sfx/wood-sfx.mp3" id="10_psxpr"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v27ob"]
+texture = ExtResource("6_3vuup")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_6vre4"]
+sources/0 = SubResource("TileSetAtlasSource_v27ob")
+
+[node name="Main" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_c8m17")
+_log_scene = ExtResource("6_ef13q")
+_fire_scene = ExtResource("3_bhkb7")
+_footprint_scene = ExtResource("4_edlff")
+
+[node name="Fire" parent="." instance=ExtResource("3_bhkb7")]
+position = Vector2(0, 69)
+
+[node name="HUD" parent="." instance=ExtResource("5_apr6c")]
+process_mode = 3
+
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = SubResource("TileSet_6vre4")
+
+[node name="TreeTileMapLayer" parent="." instance=ExtResource("7_hai6q")]
+z_index = 0
+y_sort_enabled = true
+
+[node name="WarmthTimer" type="Timer" parent="."]
+
+[node name="WinTimer" type="Timer" parent="."]
+wait_time = 60.0
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(0, 0, 0, 1)
+
+[node name="Player" parent="." instance=ExtResource("4_6a7ae")]
+
+[node name="ActionCooldownTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[node name="BlizzardSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("9_l4rno")
+parameters/looping = true
+
+[node name="WoodPickupSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_psxpr")
+volume_db = -3.5
+
+[connection signal="enter_warm_zone" from="Fire" to="." method="_on_fire_enter_warm_zone"]
+[connection signal="exit_warm_zone" from="Fire" to="." method="_on_fire_exit_warm_zone"]
+[connection signal="spawn_log" from="TreeTileMapLayer" to="." method="_on_tree_tile_map_layer_spawn_log"]
+[connection signal="leave_print" from="Player" to="." method="_on_player_leave_print"]
+[connection signal="move" from="Player" to="." method="_on_player_move"]

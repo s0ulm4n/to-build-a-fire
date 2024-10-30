@@ -1,0 +1,133 @@
+[gd_scene load_steps=8 format=3 uid="uid://d4j3dc8tcx45c"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_sd11h"]
+[ext_resource type="Shader" path="res://shaders/frost.gdshader" id="2_jespf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_14l8t"]
+shader = ExtResource("2_jespf")
+shader_parameter/frostyness = 2.0
+shader_parameter/colorize = 1.0
+shader_parameter/frost_color = Color(0.7, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t5c0w"]
+shader = ExtResource("2_jespf")
+shader_parameter/frostyness = 2.0
+shader_parameter/colorize = 1.0
+shader_parameter/frost_color = Color(0.7, 1, 1, 1)
+
+[sub_resource type="Gradient" id="Gradient_ne8bh"]
+colors = PackedColorArray(0, 0, 0, 0, 1, 1, 1, 0)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_e8e4m"]
+noise_type = 2
+frequency = 0.0017
+offset = Vector3(-444.45, 111.11, 0)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_x3848"]
+color_ramp = SubResource("Gradient_ne8bh")
+noise = SubResource("FastNoiseLite_e8e4m")
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_sd11h")
+
+[node name="MatchesCountLabel" type="Label" parent="."]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -44.0
+offset_bottom = 44.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="WarmthLabel" type="Label" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="GameOverLabel" type="Label" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -43.5
+offset_top = -44.0
+offset_right = 43.5
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 64
+
+[node name="LogsCountLabel" type="Label" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="CoordLabel" type="Label" parent="."]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+
+[node name="TimeToWinLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 48
+
+[node name="GamePausedLabel" type="Label" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -23.5
+offset_top = -11.5
+offset_right = 23.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.611765, 0, 0, 1)
+theme_override_font_sizes/font_size = 64
+text = "Pause"
+
+[node name="FrostShaderColorRect" type="ColorRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_14l8t")
+offset_right = 500.0
+offset_bottom = 500.0
+color = Color(1, 1, 1, 0)
+
+[node name="FrostShaderTextureRect" type="TextureRect" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_t5c0w")
+offset_right = 40.0
+offset_bottom = 40.0
+texture = SubResource("NoiseTexture2D_x3848")
