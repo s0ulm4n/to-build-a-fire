@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dig75g1rtafay"]
 
-[ext_resource type="Texture2D" uid="uid://cxd1w3qeamiv8" path="res://sprites/collectables/Log.png" id="1_j2l0g"]
+[ext_resource type="Texture2D" uid="uid://cxd1w3qeamiv8" path="res://sprites/pickups/Log.png" id="1_j2l0g"]
 [ext_resource type="Script" path="res://scripts/log.gd" id="1_q1x2q"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0432n"]

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxd1w3qeamiv8"
-path="res://.godot/imported/Log.png-4a8c370d23bd73ccc027dc6959e070bd.ctex"
+path="res://.godot/imported/Log.png-f26d88df01826d1b3d218de0b77a16f7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/collectables/Log.png"
-dest_files=["res://.godot/imported/Log.png-4a8c370d23bd73ccc027dc6959e070bd.ctex"]
+source_file="res://sprites/pickups/Log.png"
+dest_files=["res://.godot/imported/Log.png-f26d88df01826d1b3d218de0b77a16f7.ctex"]
 
 [params]
 
