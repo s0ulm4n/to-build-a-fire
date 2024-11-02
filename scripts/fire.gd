@@ -29,9 +29,9 @@ const FIRE_SIZE_FUEL_THRESHOLDS := {
 const STARTING_FUEL: int = 10
 const FUEL_FROM_LOG: int = 5
 
-var fuel: int
+var fuel: int: set = _set_fuel
 
-var _current_size: FireSize
+var _current_size: FireSize: set = _set_current_size
 
 @onready var fire_sprite: AnimatedSprite2D = $FireSprite
 @onready var fire_sfx: AudioStreamPlayer2D = $FireSFX
@@ -45,56 +45,27 @@ var _current_size: FireSize
 func _ready() -> void:
 	fuel = STARTING_FUEL
 	_current_size = FireSize.MEDIUM
-	_change_fire_size(_current_size)
 	fire_sfx.play()
+
+# Getters and setters
+
+## Setter for the _fuel property.
+## Handles starting and stopping appropriate timers.
+func _set_fuel(value: int) -> void:
+	fuel = max(value, 0)
 	
-
-func _process(_delta: float) -> void:
-	if fuel > 0:
-		fire_sprite.visible = true
-		if burn_timer.is_stopped():
-			burn_timer.start()
-			fire_sfx.play()
-			embers_smoke_timer.stop()
-	else:
-		fire_sprite.visible = false
-
-
-func _on_body_entered(body: Node2D) -> void:
-	if body is Player:
-		enter_warm_zone.emit(self)
-		
-
-func _on_body_exited(body: Node2D) -> void:
-	if body is Player:
-		exit_warm_zone.emit(self)
-		
-
-func _on_burn_timer_timeout() -> void:
-	fuel -= 1
-	
-	if fuel > 0:
-		if fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.LARGE]:
-			_change_fire_size(FireSize.LARGE)
-		elif fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.MEDIUM]:
-			_change_fire_size(FireSize.MEDIUM)
-		elif fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.SMALL]:
-			_change_fire_size(FireSize.SMALL)
-		else:
-			_change_fire_size(FireSize.TINY)
-	else:
-		_change_fire_size(FireSize.EXTINGUISHED)
+	if fuel > 0 && burn_timer.is_stopped():
+		burn_timer.start()
+		fire_sfx.play()
+		embers_smoke_timer.stop()
+	elif fuel == 0 && !burn_timer.is_stopped():
 		burn_timer.stop()
-		fire_sfx.stop()
 		embers_smoke_timer.start()
 
 
-func _on_embers_smoke_timer_timeout() -> void:
-	smoke_particles.amount_ratio -= 0.03
-	clamp(smoke_particles.amount_ratio, 0, 1)
-
-
-func _change_fire_size(new_size: FireSize) -> void:
+## Setter for the _current_size property.
+## Handles visual and audio properties of the fire
+func _set_current_size(new_size: FireSize) -> void:
 	if _current_size == new_size:
 		pass
 	
@@ -108,11 +79,47 @@ func _change_fire_size(new_size: FireSize) -> void:
 		FireSize.TINY:
 			_update_fire_properties("burn_5", -2, 0.6, -1.0)
 		FireSize.EXTINGUISHED:
-			fire_sprite.stop()
-			smoke_particles.amount_ratio = 1.0
-			burn_timer.stop()
+			fire_sprite.visible = false
 			fire_sfx.stop()
-			embers_smoke_timer.start()
+			smoke_particles.amount_ratio = 1.0
+
+# End Getters and setters
+
+# Timers
+
+func _on_burn_timer_timeout() -> void:
+	fuel -= 1
+	
+	if fuel > 0:
+		if fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.LARGE]:
+			_current_size = FireSize.LARGE
+		elif fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.MEDIUM]:
+			_current_size = FireSize.MEDIUM
+		elif fuel > FIRE_SIZE_FUEL_THRESHOLDS[FireSize.SMALL]:
+			_current_size = FireSize.SMALL
+		else:
+			_current_size = FireSize.TINY
+	else:
+		_current_size = FireSize.EXTINGUISHED
+		burn_timer.stop()
+		fire_sfx.stop()
+		embers_smoke_timer.start()
+
+
+func _on_embers_smoke_timer_timeout() -> void:
+	smoke_particles.amount_ratio -= 0.03
+	clamp(smoke_particles.amount_ratio, 0, 1)
+
+# End Timers
+
+func _on_body_entered(body: Node2D) -> void:
+	if body is Player:
+		enter_warm_zone.emit(self)
+		
+
+func _on_body_exited(body: Node2D) -> void:
+	if body is Player:
+		exit_warm_zone.emit(self)
 
 
 ## Util function to bundle updates fire properties.
