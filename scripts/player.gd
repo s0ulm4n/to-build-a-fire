@@ -22,7 +22,8 @@ func _physics_process(_delta: float):
 	if !is_dead:
 		handle_movement()
 	sprite.flip_h = _is_sprite_flipped
-		
+
+
 func handle_movement():
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	velocity = input_dir.normalized() * PLAYER_SPEED
@@ -46,6 +47,7 @@ func handle_movement():
 	move_and_slide()
 
 	#debug_move.emit(position.x, position.y)
+
 
 func _on_footprint_timer_timeout() -> void:
 	if velocity != Vector2.ZERO:

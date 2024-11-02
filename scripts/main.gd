@@ -37,6 +37,7 @@ func _ready() -> void:
 			# For now we're only using one terrain tile
 			terrain.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
 
+
 func _process(_delta: float) -> void:
 	hud.update_warmth_label(_warmth)
 	hud.update_wood_count_label(_wood_count)
@@ -48,7 +49,8 @@ func _process(_delta: float) -> void:
 	
 	if _warmth == 0:
 		_game_over(false)
-		
+
+
 func _input(event: InputEvent):
 	# Actions processed here don't require a cooldown, because this
 	# will be called ONCE PER KEYPRESS.
@@ -80,7 +82,8 @@ func _on_warmth_timer_timeout():
 			"frostyness",
 			frostyness
 		)
-	
+
+
 func _on_win_timer_timeout():
 	_hours_left_to_win -= 1
 
@@ -92,7 +95,8 @@ func player_action_refuel_fire() -> void:
 	if _wood_count > 0 && _nearby_fire != null:
 		_wood_count -= 1
 		_nearby_fire.fuel += Fire.FUEL_FROM_LOG
-		
+
+
 func player_action_spawn_fire() -> void:
 	# We don't want to spawn fires too close to each other
 	if _matches_count > 0 && _wood_count > 0 && _nearby_fire == null:
@@ -115,6 +119,7 @@ func _on_fire_enter_warm_zone(fire: Fire) -> void:
 	_nearby_fire = fire
 	blizzard_sfx.volume_db = -3.0
 
+
 func _on_fire_exit_warm_zone(fire: Fire) -> void:
 	if _nearby_fire == fire:
 		_nearby_fire = null
@@ -123,24 +128,26 @@ func _on_fire_exit_warm_zone(fire: Fire) -> void:
 ## End Fire signals ##
 
 ## Player signals ##
-		
+
 func _on_player_leave_print(pos: Vector2, angle: float) -> void:
 	var footprint: Sprite2D = footprint_scene.instantiate()
 	footprint.position = pos + Vector2(0, 14)
 	footprint.rotation += angle
+	footprint.visible = true
+	
 	if _flip_footprint:
 		footprint.flip_h = true
 	_flip_footprint = !_flip_footprint
-	# Not sure why the log isn't spawned visible
-	footprint.visible = true
 	
 	# This didn't work when I was just calling add_child(spawned_log)
 	# See https://forum.godotengine.org/t/packedscene-instance-not-working-in-ready-function/2339/2
 	add_child.call_deferred(footprint)
 
+
 # debug
 func _on_player_move(x: float, y: float) -> void:
-	hud.update_coord_label(round(x), round(y))
+	#hud.update_coord_label(round(x), round(y))
+	pass
 
 ## End Player signals ##
 
@@ -150,6 +157,7 @@ func _on_log_pickup() -> void:
 	_wood_count += 1
 	wood_pickup_sfx.play()
 	hud.update_wood_count_label(_wood_count)
+	
 
 func _on_tree_tile_map_layer_spawn_log(x: float, y: float) -> void:
 	var spawned_log: Area2D = wood_pickup_scene.instantiate()
