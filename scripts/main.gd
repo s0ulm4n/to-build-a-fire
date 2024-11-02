@@ -1,59 +1,53 @@
-extends Node2D
 class_name World
+extends Node2D
 
-const WORLD_HEIGHT = 256
-const WORLD_WIDTH = 256
+## Main game node.
+##
+## Handles keeping track of and updating game state.
 
-@export var _log_scene: PackedScene
-@export var _fire_scene: PackedScene
-@export var _footprint_scene: PackedScene
+const WORLD_HEIGHT: int = 256
+const WORLD_WIDTH: int = 256
 
-@onready var _hud: HUD = $HUD
-@onready var _warmth_timer: Timer = $WarmthTimer
-@onready var _win_timer: Timer = $WinTimer
+@export var wood_pickup_scene: PackedScene
+@export var fire_scene: PackedScene
+@export var footprint_scene: PackedScene
 
-@onready var _player: Player = $Player
-@onready var _terrain: TileMapLayer = $TerrainTileMapLayer
+var _warmth: int = 100
+var _wood_count: int = 0
+var _matches_count: int = 3
+var _hours_left_to_win: int = 6
+var _flip_footprint: bool = false
 
-@onready var _blizzard_sfx: AudioStreamPlayer = $BlizzardSFX
-@onready var _wood_pickup_sfx: AudioStreamPlayer = $WoodPickupSFX
+var _nearby_fire: Fire
 
-var warmth: int = 100
-var logs_count: int = 0
-var matches_count: int = 3
-var hours_left_to_win: int = 6
+@onready var player: Player = $Player
+@onready var terrain: TileMapLayer = $TerrainTileMapLayer
 
-var nearby_fire: Fire
+@onready var hud: HUD = $HUD
 
-var flip_footprint: bool = false
+@onready var warmth_timer: Timer = $WarmthTimer
+@onready var win_timer: Timer = $WinTimer
+
+@onready var blizzard_sfx: AudioStreamPlayer = $BlizzardSFX
+@onready var wood_pickup_sfx: AudioStreamPlayer = $WoodPickupSFX
 
 func _ready() -> void:
-	# Setup warmth timer.
-	# This can be done vie the Timer Node settings, but it feels
-	# more intuitive to do this here explicitly.
-	#_warmth_timer.wait_time = 1 # 1 second
-	_warmth_timer.connect("timeout", _on_warmth_timer_timeout)
-	_warmth_timer.start()
-	
-	_win_timer.wait_time = 60 # 1 minute = 1 hour in-game
-	_win_timer.connect("timeout", _on_win_timer_timeout)
-	_win_timer.start()
-	
 	for x in range(-WORLD_WIDTH / 2, WORLD_WIDTH / 2):
 		for y in range(-WORLD_HEIGHT / 2, WORLD_HEIGHT / 2):
-			_terrain.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
+			# For now we're only using one terrain tile
+			terrain.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
 
 func _process(_delta: float) -> void:
-	_hud.update_warmth_label(warmth)
-	_hud.update_logs_count_label(logs_count)
-	_hud.update_matches_count_label(matches_count)
-	_hud.update_time_to_win_label(hours_left_to_win)
+	hud.update_warmth_label(_warmth)
+	hud.update_wood_count_label(_wood_count)
+	hud.update_matches_count_label(_matches_count)
+	hud.update_time_to_win_label(_hours_left_to_win)
 	
-	if (hours_left_to_win == 0):
-		game_over(true)
+	if _hours_left_to_win == 0:
+		_game_over(true)
 	
-	if (warmth == 0):
-		game_over(false)
+	if _warmth == 0:
+		_game_over(false)
 		
 func _input(event: InputEvent):
 	# Actions processed here don't require a cooldown, because this
@@ -61,52 +55,52 @@ func _input(event: InputEvent):
 	# Earlier I was handling inputs in _process, which meant I had to
 	# have a dedicated cooldown timer, because otherwise the actions
 	# triggered every frame while the button was pressed.
-	if (event.is_action_pressed("refuel_fire")):
+	if event.is_action_pressed("refuel_fire"):
 		player_action_refuel_fire()
-	elif (event.is_action_pressed("spawn_fire")):
+	elif event.is_action_pressed("spawn_fire"):
 		player_action_spawn_fire()
 
 ## Timers ##
 
 func _on_warmth_timer_timeout():
-	if nearby_fire && nearby_fire.fuel > 0:
-		warmth += 1
+	if _nearby_fire && _nearby_fire.fuel > 0:
+		_warmth += 1
 	else:
-		warmth -= 1
-	warmth = clamp(warmth, 0, 100)
+		_warmth -= 1
+	_warmth = clamp(_warmth, 0, 100)
 	
-	if (warmth > 80):
-		_hud._frost_shader.visible = false
+	if _warmth > 80:
+		hud.frost_shader.visible = false
 	else:
-		_hud._frost_shader.visible = true
-		_hud._frost_shader.queue_redraw()
-		var frostyness = 0.5 + (80 - warmth) / 20
+		hud.frost_shader.visible = true
+		hud.frost_shader.queue_redraw()
+		var frostyness := 0.5 + (80 - _warmth) / 20
 			
-		_hud._frost_shader.material.set_shader_parameter(
+		hud.frost_shader.material.set_shader_parameter(
 			"frostyness",
 			frostyness
 		)
 	
 func _on_win_timer_timeout():
-	hours_left_to_win -= 1
+	_hours_left_to_win -= 1
 
 ## End Timers ##
 
 ## Player actions ##
 
 func player_action_refuel_fire() -> void:
-	if (logs_count > 0 && nearby_fire != null):
-		logs_count -= 1
-		nearby_fire.fuel += Fire.FUEL_FROM_LOG
+	if _wood_count > 0 && _nearby_fire != null:
+		_wood_count -= 1
+		_nearby_fire.fuel += Fire.FUEL_FROM_LOG
 		
 func player_action_spawn_fire() -> void:
 	# We don't want to spawn fires too close to each other
-	if (matches_count > 0 && logs_count > 0 && nearby_fire == null):
-		matches_count -= 1
-		logs_count -= 1
+	if _matches_count > 0 && _wood_count > 0 && _nearby_fire == null:
+		_matches_count -= 1
+		_wood_count -= 1
 		
-		var spawned_fire: Fire = _fire_scene.instantiate()
-		spawned_fire.position = _player.position
+		var spawned_fire: Fire = fire_scene.instantiate()
+		spawned_fire.position = player.position
 		spawned_fire.visible = true
 		spawned_fire.connect("enter_warm_zone", _on_fire_enter_warm_zone)
 		spawned_fire.connect("exit_warm_zone", _on_fire_exit_warm_zone)
@@ -118,25 +112,25 @@ func player_action_spawn_fire() -> void:
 ## Fire signals
 
 func _on_fire_enter_warm_zone(fire: Fire) -> void:
-	nearby_fire = fire
-	_blizzard_sfx.volume_db = -3.0
+	_nearby_fire = fire
+	blizzard_sfx.volume_db = -3.0
 
 func _on_fire_exit_warm_zone(fire: Fire) -> void:
-	if (nearby_fire == fire):
-		nearby_fire = null
-	_blizzard_sfx.volume_db = 0.0
+	if _nearby_fire == fire:
+		_nearby_fire = null
+	blizzard_sfx.volume_db = 0.0
 
 ## End Fire signals ##
 
 ## Player signals ##
 		
 func _on_player_leave_print(pos: Vector2, angle: float) -> void:
-	var footprint: Sprite2D = _footprint_scene.instantiate()
+	var footprint: Sprite2D = footprint_scene.instantiate()
 	footprint.position = pos + Vector2(0, 14)
 	footprint.rotation += angle
-	if (flip_footprint):
+	if _flip_footprint:
 		footprint.flip_h = true
-	flip_footprint = !flip_footprint
+	_flip_footprint = !_flip_footprint
 	# Not sure why the log isn't spawned visible
 	footprint.visible = true
 	
@@ -146,19 +140,19 @@ func _on_player_leave_print(pos: Vector2, angle: float) -> void:
 
 # debug
 func _on_player_move(x: float, y: float) -> void:
-	_hud.update_coord_label(round(x), round(y))
+	hud.update_coord_label(round(x), round(y))
 
 ## End Player signals ##
 
 ## Other signals ##
 
 func _on_log_pickup() -> void:
-	logs_count += 1
-	_wood_pickup_sfx.play()
-	_hud.update_logs_count_label(logs_count)
+	_wood_count += 1
+	wood_pickup_sfx.play()
+	hud.update_wood_count_label(_wood_count)
 
 func _on_tree_tile_map_layer_spawn_log(x: float, y: float) -> void:
-	var spawned_log: Area2D = _log_scene.instantiate()
+	var spawned_log: Area2D = wood_pickup_scene.instantiate()
 	spawned_log.position = Vector2(x, y)
 	# Not sure why the log isn't spawned visible
 	spawned_log.visible = true
@@ -174,19 +168,19 @@ func _on_tree_tile_map_layer_spawn_log(x: float, y: float) -> void:
 
 ## Misc ##
 
-func game_over(did_win: bool) -> void:
-	if (did_win):
-		_hud.set_game_over_label_text("The blizzard is over!\nYou survived!")
+func _game_over(did_win: bool) -> void:
+	if did_win:
+		hud.game_over_label.text = "The blizzard is over!\nYou survived!"
 	else:
-		_hud.set_game_over_label_text("Game Over\nYou froze :(")
+		hud.game_over_label.text = "Game Over\nYou froze :("
 	
-	_warmth_timer.stop()
-	_player.is_dead = true
-	_hud._warmth_label.visible = false
-	_hud._logs_count_label.visible = false
-	_hud._time_to_win_label.visible = false
-	_hud._matches_count_label.visible = false
+	warmth_timer.stop()
+	player.is_dead = true
+	hud.warmth_label.visible = false
+	hud.wood_count_label.visible = false
+	hud.time_to_win_label.visible = false
+	hud.matches_count_label.visible = false
 	
-	_hud._game_over_label.visible = true
+	hud.game_over_label.visible = true
 
 ## End Misc ##

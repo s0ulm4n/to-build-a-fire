@@ -54,7 +54,7 @@ shader_parameter/base_rain_speed = 0.8
 shader_parameter/additional_rain_speed = 0.8
 shader_parameter/slant = 0.9
 
-[node name="CharacterBody2D" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D"]
 motion_mode = 1
 script = ExtResource("1_pl5ui")
 
@@ -62,21 +62,17 @@ script = ExtResource("1_pl5ui")
 position = Vector2(0, 1.5)
 shape = SubResource("RectangleShape2D_x2roa")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="PlayerSprite" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_8wvkn")
 animation = &"walk"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(3, 3)
 
-[node name="ActionCooldownTimer" type="Timer" parent="."]
-wait_time = 0.5
-one_shot = true
-
 [node name="PointLight2D" type="PointLight2D" parent="."]
 texture = ExtResource("6_k4wsj")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="SnowShader" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_lf0tl")
 offset_left = -384.0
 offset_top = -216.0

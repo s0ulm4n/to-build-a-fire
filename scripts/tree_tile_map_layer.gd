@@ -1,44 +1,34 @@
 extends TileMapLayer
 
-#const SIZE_X: int = 128
-#const SIZE_Y: int = 128
-const TREE_THRESHOLD: float = 0.2
-const LOG_THRESHOLD: float = 0.995
-#const TREE_TILE_WIDTH: int = 38
-#const TREE_TILE_HEIGHT: int = 64
-
-@export var noise_texture: NoiseTexture2D
+## Procedurally generated tile map.
+## Also handles generating trees and spawning wood pickups.
 
 signal spawn_log(x: float, y: float)
 
-var noise
-#debug
-#var values_array = []
+const TREE_GEN_THRESHOLD := 0.2
+const LOG_GEN_THRESHOLD := 0.995
+
+@export var noise_texture: NoiseTexture2D
+
+var _noise: Noise
 
 func _ready() -> void:
-	noise = noise_texture.noise
+	_noise = noise_texture.noise
 	
 	for x in range(-World.WORLD_WIDTH / 2, World.WORLD_WIDTH / 2):
 		for y in range(-World.WORLD_HEIGHT / 2, World.WORLD_HEIGHT / 2):
-			# This is very weird and needs to be rewritten
-			var temp = noise.get_noise_2d(x, y) * -1
-			# debug
-			# values_array.append(temp)
-			# print(temp)
-			if (temp > TREE_THRESHOLD):
-				var tree_atlas_num: int
-				if (randf() > 0.5): 
-					tree_atlas_num = 0
-				else:
-					tree_atlas_num = 1
-				set_cell(Vector2i(x, y), tree_atlas_num, Vector2i.ZERO)
+			# I find it easier to work with the noise values after
+			# flipping their sign.
+			var noise_value := _noise.get_noise_2d(x, y) * -1.0
+			
+			if noise_value > TREE_GEN_THRESHOLD:
+				# Generate a tree in this cell
 				
-				#debug
-				#print("Planting a tree at cell (", x, ", ", y, ")")
+				# Pick the tree sprite to use
+				var tree_atlas_num: int = 0 if randf() > 0.5 else 1
+				
+				set_cell(Vector2i(x, y), tree_atlas_num, Vector2i.ZERO)
 			else:
-				if (randf() > LOG_THRESHOLD):
-					# print("Spawning a log at (", x * TILE_WIDTH, ", ", y * TILE_HEIGHT, ")");
+				if randf() > LOG_GEN_THRESHOLD:
+					# Spawn a log pickup
 					spawn_log.emit(x * 16, y * 16)
-	# debug
-	#print("min: ", values_array.min())
-	#print("max: ", values_array.max())

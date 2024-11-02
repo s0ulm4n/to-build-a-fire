@@ -22,15 +22,17 @@ sources/0 = SubResource("TileSetAtlasSource_v27ob")
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_c8m17")
-_log_scene = ExtResource("6_ef13q")
-_fire_scene = ExtResource("3_bhkb7")
-_footprint_scene = ExtResource("4_edlff")
+wood_pickup_scene = ExtResource("6_ef13q")
+fire_scene = ExtResource("3_bhkb7")
+footprint_scene = ExtResource("4_edlff")
+
+[node name="HUD" parent="." instance=ExtResource("5_apr6c")]
+process_mode = 3
 
 [node name="Fire" parent="." instance=ExtResource("3_bhkb7")]
 position = Vector2(0, 69)
 
-[node name="HUD" parent="." instance=ExtResource("5_apr6c")]
-process_mode = 3
+[node name="Player" parent="." instance=ExtResource("4_6a7ae")]
 
 [node name="TerrainTileMapLayer" type="TileMapLayer" parent="."]
 z_index = -1
@@ -40,19 +42,8 @@ tile_set = SubResource("TileSet_6vre4")
 z_index = 0
 y_sort_enabled = true
 
-[node name="WarmthTimer" type="Timer" parent="."]
-
-[node name="WinTimer" type="Timer" parent="."]
-wait_time = 60.0
-
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0, 0, 0, 1)
-
-[node name="Player" parent="." instance=ExtResource("4_6a7ae")]
-
-[node name="ActionCooldownTimer" type="Timer" parent="."]
-wait_time = 0.5
-one_shot = true
 
 [node name="BlizzardSFX" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("9_l4rno")
@@ -62,8 +53,16 @@ parameters/looping = true
 stream = ExtResource("10_psxpr")
 volume_db = -3.5
 
+[node name="WarmthTimer" type="Timer" parent="."]
+autostart = true
+
+[node name="WinTimer" type="Timer" parent="."]
+wait_time = 60.0
+autostart = true
+
 [connection signal="enter_warm_zone" from="Fire" to="." method="_on_fire_enter_warm_zone"]
 [connection signal="exit_warm_zone" from="Fire" to="." method="_on_fire_exit_warm_zone"]
-[connection signal="spawn_log" from="TreeTileMapLayer" to="." method="_on_tree_tile_map_layer_spawn_log"]
 [connection signal="leave_print" from="Player" to="." method="_on_player_leave_print"]
-[connection signal="move" from="Player" to="." method="_on_player_move"]
+[connection signal="spawn_log" from="TreeTileMapLayer" to="." method="_on_tree_tile_map_layer_spawn_log"]
+[connection signal="timeout" from="WarmthTimer" to="." method="_on_warmth_timer_timeout"]
+[connection signal="timeout" from="WinTimer" to="." method="_on_win_timer_timeout"]
