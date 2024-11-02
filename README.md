@@ -1,17 +1,18 @@
-## Story
-Everybody said that going anywhere so close to dusk with a blizzard on the way was a ***bad*** idea. But of course, you knew better.
+**To Build a Fire** is a short game written in Godot for a game jam, drawing inspiration from [a short story by Jack London](https://en.wikipedia.org/wiki/To_Build_a_Fire).
 
-Well, not you're lost in the woods, with no idea which way to go to reach civilization again. 
-Because of the blizzard you can barely see five feet in front of you, and you're sure that if you try to press on or turn back, you will not make it. 
-Your only chance is to wait until the sun comes up and the wind dies down a bit, so you could figure out which way to go.
+## Story
+Everyone you talked to said that traveling *anywhere* in this weather, with a blizzard on the way, was a ***bad*** idea. Especially traveling alone. But of course, you knew better.
+
+You realize your mistake, now that you've no idea which way to go to reach civilization again.
+Because of the blizzard you can barely see five feet ahead of you, and you're sure that whether you try to press on or turn back, you will not make it far. 
+Your only chance is to wait until dawn and hope the wind dies down a bit, so you could figure out which way to go.
+
+In order to do that, you will need to build a fire, and then you will need to keep that fire going for as long as you can.
 
 Save your matches. Save your warmth. This will be a long night.
 
 ## Gameplay
-The goal of the game is to survive for a set period of time. In order to do that you will need to maintain a fire to keep yourself warm.
-
-Your warmth meter will gradually decrease, unless you're close to a burning fire, which will raise the meter (but only up to 100). If the meter reaches 0, you die.
-
+The goal of the game is to survive for a set period of time. Your warmth meter will gradually decrease, unless you're close to a burning fire, which will raise the meter (but only up to 100). If the meter reaches 0, you die.
 
 A fire needs to be refueled by wood you can find lying around (you don't have an axe, so chopping down any of those trees around is not an option).
 
