@@ -12,11 +12,36 @@ const WORLD_WIDTH: int = 256
 @export var fire_scene: PackedScene
 @export var footprint_scene: PackedScene
 
-var _warmth: int = 100
-var _wood_count: int = 0
-var _matches_count: int = 3
-var _hours_left_to_win: int = 6
-var _flip_footprint: bool = false
+var _warmth: int:
+	set(value):
+		_warmth = value
+		print("set warmth to ", _warmth)
+		hud.update_warmth_label(value)
+		if value == 0:
+			_game_over(false)
+		
+var _wood_count: int:
+	set(value):
+		_wood_count = value
+		hud.update_wood_count_label(value)
+		
+var _matches_count: int:
+	set(value):
+		_matches_count = value
+		hud.update_matches_count_label(value)
+		
+var _hours_left_to_win: int:
+	set(value):
+		_hours_left_to_win = value
+		hud.update_time_to_win_label(value)
+		if value == 0:
+			_game_over(true)
+		
+var _flip_footprint: bool:
+	get:
+		# Flip the footprint every time we access the property
+		_flip_footprint = !_flip_footprint
+		return _flip_footprint
 
 var _nearby_fire: Fire
 
@@ -32,23 +57,17 @@ var _nearby_fire: Fire
 @onready var wood_pickup_sfx: AudioStreamPlayer = $WoodPickupSFX
 
 func _ready() -> void:
+	# Initialize game state
+	_warmth = 100
+	_wood_count = 0
+	_matches_count = 3
+	_hours_left_to_win = 6
+	
+	# Generate snow tiles
 	for x in range(-WORLD_WIDTH / 2, WORLD_WIDTH / 2):
 		for y in range(-WORLD_HEIGHT / 2, WORLD_HEIGHT / 2):
 			# For now we're only using one terrain tile
 			terrain.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
-
-
-func _process(_delta: float) -> void:
-	hud.update_warmth_label(_warmth)
-	hud.update_wood_count_label(_wood_count)
-	hud.update_matches_count_label(_matches_count)
-	hud.update_time_to_win_label(_hours_left_to_win)
-	
-	if _hours_left_to_win == 0:
-		_game_over(true)
-	
-	if _warmth == 0:
-		_game_over(false)
 
 
 func _input(event: InputEvent):
@@ -137,7 +156,6 @@ func _on_player_leave_print(pos: Vector2, angle: float) -> void:
 	
 	if _flip_footprint:
 		footprint.flip_h = true
-	_flip_footprint = !_flip_footprint
 	
 	# This didn't work when I was just calling add_child(spawned_log)
 	# See https://forum.godotengine.org/t/packedscene-instance-not-working-in-ready-function/2339/2
