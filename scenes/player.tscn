@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://gp1sicvtn6sn"]
+[gd_scene load_steps=10 format=3 uid="uid://gp1sicvtn6sn"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_pl5ui"]
 [ext_resource type="Texture2D" uid="uid://brk1qfejblw31" path="res://sprites/player/sprite_1.png" id="2_3v0tx"]
@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://vra4y02tu2hx" path="res://sprites/player/sprite_3.png" id="4_qidut"]
 [ext_resource type="Texture2D" uid="uid://kadwtq36goua" path="res://sprites/player/sprite_4.png" id="5_fcmlk"]
 [ext_resource type="Texture2D" uid="uid://dvl7kovn5ttlf" path="res://sprites/effects/2d_light.webp" id="6_k4wsj"]
-[ext_resource type="Shader" path="res://shaders/main.gdshader" id="7_h3bxm"]
 [ext_resource type="AudioStream" uid="uid://buoi4xub0y6kq" path="res://sfx/snow_steps_sfx.mp3" id="8_mk5hy"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x2roa"]
@@ -40,20 +39,6 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_lf0tl"]
-shader = ExtResource("7_h3bxm")
-shader_parameter/rain_amount = 200.0
-shader_parameter/near_rain_length = 0.1
-shader_parameter/far_rain_length = 0.05
-shader_parameter/near_rain_width = 0.5
-shader_parameter/far_rain_width = 0.5
-shader_parameter/near_rain_transparency = 1.0
-shader_parameter/far_rain_transparency = 0.25
-shader_parameter/rain_color = Color(0.8, 0.8, 0.8, 1)
-shader_parameter/base_rain_speed = 0.8
-shader_parameter/additional_rain_speed = 0.8
-shader_parameter/slant = 0.9
-
 [node name="Player" type="CharacterBody2D"]
 motion_mode = 1
 script = ExtResource("1_pl5ui")
@@ -71,15 +56,6 @@ zoom = Vector2(3, 3)
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 texture = ExtResource("6_k4wsj")
-
-[node name="SnowShader" type="ColorRect" parent="."]
-material = SubResource("ShaderMaterial_lf0tl")
-offset_left = -384.0
-offset_top = -216.0
-offset_right = -344.0
-offset_bottom = -176.0
-scale = Vector2(19.2188, 10.8029)
-color = Color(0, 0, 0, 0)
 
 [node name="FootprintTimer" type="Timer" parent="."]
 wait_time = 0.3

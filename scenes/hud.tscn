@@ -1,7 +1,22 @@
-[gd_scene load_steps=7 format=3 uid="uid://d4j3dc8tcx45c"]
+[gd_scene load_steps=9 format=3 uid="uid://d4j3dc8tcx45c"]
 
 [ext_resource type="Script" path="res://scripts/hud.gd" id="1_sd11h"]
+[ext_resource type="Shader" path="res://shaders/main.gdshader" id="2_iob8v"]
 [ext_resource type="Shader" path="res://shaders/frost.gdshader" id="2_jespf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_luuaj"]
+shader = ExtResource("2_iob8v")
+shader_parameter/rain_amount = 200.0
+shader_parameter/near_rain_length = 0.1
+shader_parameter/far_rain_length = 0.05
+shader_parameter/near_rain_width = 0.5
+shader_parameter/far_rain_width = 0.5
+shader_parameter/near_rain_transparency = 1.0
+shader_parameter/far_rain_transparency = 0.25
+shader_parameter/rain_color = Color(0.8, 0.8, 0.8, 1)
+shader_parameter/base_rain_speed = 0.8
+shader_parameter/additional_rain_speed = 0.8
+shader_parameter/slant = 0.9
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_t5c0w"]
 shader = ExtResource("2_jespf")
@@ -23,6 +38,10 @@ noise = SubResource("FastNoiseLite_e8e4m")
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_sd11h")
+
+[node name="SnowShader" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_luuaj")
+color = Color(0, 0, 0, 0)
 
 [node name="MatchesCountLabel" type="Label" parent="."]
 anchors_preset = 6

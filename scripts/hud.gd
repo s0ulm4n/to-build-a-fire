@@ -11,10 +11,13 @@ extends CanvasLayer
 @onready var time_to_win_label: Label = $TimeToWinLabel
 @onready var game_paused_label: Label = $GamePausedLabel
 
+@onready var snow_effect: ColorRect = $SnowShader
 @onready var frost_shader: TextureRect = $FrostShaderTextureRect
 
 func _ready() -> void:
-	frost_shader.size = DisplayServer.window_get_size()
+	var window_size := DisplayServer.window_get_size()
+	snow_effect.size = window_size
+	frost_shader.size = window_size
 
 
 func _input(event: InputEvent) -> void:

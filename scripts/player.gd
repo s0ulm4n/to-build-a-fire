@@ -15,7 +15,6 @@ var is_dead := false
 var _is_sprite_flipped := false
 
 @onready var sprite: AnimatedSprite2D = $PlayerSprite
-@onready var snow_effect: ColorRect = $SnowShader
 @onready var footsteps_sfx: AudioStreamPlayer = $FootstepsSFX
 
 func _physics_process(_delta: float):
