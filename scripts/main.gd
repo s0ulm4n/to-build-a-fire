@@ -227,6 +227,7 @@ func _on_fire_exit_warm_zone(fire: Fire) -> void:
 func _on_player_leave_print(pos: Vector2, angle: float) -> void:
 	var footprint: Sprite2D = footprint_scene.instantiate()
 	footprint.position = pos + Vector2(0, 14)
+	footprint.z_index = -1
 	footprint.rotation += angle
 	footprint.visible = true
 	
