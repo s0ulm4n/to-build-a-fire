@@ -50,5 +50,5 @@ func update_matches_count_label(matches_count: int) -> void:
 	matches_count_label.text = str("Matches: ", matches_count)
 
 
-func update_time_to_win_label(hours_left: int) -> void:
-	time_to_win_label.text = str("Blizzard ends in ", hours_left, " hours")
+func update_time_to_win_label(time_left: int) -> void:
+	time_to_win_label.text = str("Blizzard ends in ", ceil(time_left / 60), " hours")

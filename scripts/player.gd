@@ -16,6 +16,7 @@ var _is_sprite_flipped := false
 
 @onready var sprite: AnimatedSprite2D = $PlayerSprite
 @onready var footsteps_sfx: AudioStreamPlayer = $FootstepsSFX
+@onready var light: PointLight2D = $PointLight2D
 
 func _physics_process(_delta: float):
 	if !is_dead:

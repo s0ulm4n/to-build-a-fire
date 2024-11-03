@@ -68,8 +68,9 @@ func _set_fuel(value: int) -> void:
 func _set_current_size(new_size: FireSize) -> void:
 	if _current_size == new_size:
 		pass
-	
-	match new_size:
+		
+	_current_size = new_size
+	match _current_size:
 		FireSize.LARGE:
 			_update_fire_properties("burn_1", -13, 0.2, 1.0)
 		FireSize.MEDIUM:

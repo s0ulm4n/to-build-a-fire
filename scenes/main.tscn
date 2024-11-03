@@ -42,7 +42,7 @@ tile_set = SubResource("TileSet_6vre4")
 z_index = 0
 y_sort_enabled = true
 
-[node name="CanvasModulate" type="CanvasModulate" parent="."]
+[node name="DarknessEffect" type="CanvasModulate" parent="."]
 color = Color(0, 0, 0, 1)
 
 [node name="BlizzardSFX" type="AudioStreamPlayer" parent="."]
@@ -57,8 +57,10 @@ volume_db = -3.5
 autostart = true
 
 [node name="WinTimer" type="Timer" parent="."]
-wait_time = 60.0
 autostart = true
+
+[node name="BlizzardCalmingTimer" type="Timer" parent="."]
+wait_time = 30.0
 
 [connection signal="enter_warm_zone" from="Fire" to="." method="_on_fire_enter_warm_zone"]
 [connection signal="exit_warm_zone" from="Fire" to="." method="_on_fire_exit_warm_zone"]
@@ -66,3 +68,4 @@ autostart = true
 [connection signal="spawn_log" from="TreeTileMapLayer" to="." method="_on_tree_tile_map_layer_spawn_log"]
 [connection signal="timeout" from="WarmthTimer" to="." method="_on_warmth_timer_timeout"]
 [connection signal="timeout" from="WinTimer" to="." method="_on_win_timer_timeout"]
+[connection signal="timeout" from="BlizzardCalmingTimer" to="." method="_on_blizzard_calming_timer_timeout"]

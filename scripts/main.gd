@@ -8,60 +8,100 @@ extends Node2D
 const WORLD_HEIGHT: int = 256
 const WORLD_WIDTH: int = 256
 
+const GAME_LENGTH: int = 359
+
+const DAWN_START_TIME: int = 120
+const DAWN_FINAL_RGB_MODULATION := 0.6
+
+const BLIZZARD_CALM_TIME: int = 150
+const BLIZZARD_START_SLANT := 0.9
+const BLIZZARD_CALM_SLANT := 0.3
+const BLIZZARD_START_BASE_SPEED := 0.8
+const BLIZZARD_CALM_BASE_SPEED := 0.3
+const BLIZZARD_START_ADDL_SPEED := 0.8
+const BLIZZARD_CALM_ADDL_SPEED := 0.3
+
 @export var wood_pickup_scene: PackedScene
 @export var fire_scene: PackedScene
 @export var footprint_scene: PackedScene
 
+# Player warmth acts as HP. Reaching results in a game over.
 var _warmth: int:
 	set(value):
-		_warmth = value
-		print("set warmth to ", _warmth)
-		hud.update_warmth_label(value)
-		if value == 0:
+		_warmth = clamp(value, 0, 100)
+		hud.update_warmth_label(_warmth)
+		if _warmth == 0:
 			_game_over(false)
-		
+
+# Wood is used to refuel burning fires or start new ones.
+# Replenished by picking up logs.
 var _wood_count: int:
 	set(value):
 		_wood_count = value
-		hud.update_wood_count_label(value)
-		
+		hud.update_wood_count_label(_wood_count)
+
+# Matches are used to start new fires (also consumes 1 wood).
+# Matches can't be replenished.
 var _matches_count: int:
 	set(value):
 		_matches_count = value
-		hud.update_matches_count_label(value)
-		
-var _hours_left_to_win: int:
+		hud.update_matches_count_label(_matches_count)
+
+# Represents the length of time (in seconds) the player needs to stay alive
+# in order to win the game.
+var _time_left_to_win: int:
 	set(value):
-		_hours_left_to_win = value
-		hud.update_time_to_win_label(value)
-		if value == 0:
+		_time_left_to_win = value
+		hud.update_time_to_win_label(_time_left_to_win)
+		if _time_left_to_win == 0:
 			_game_over(true)
 		
+# When spawning player footprints, this affects whether the footprint sprite
+# should be mirrored (as in left foot VS right foot)
 var _flip_footprint: bool:
 	get:
 		# Flip the footprint every time we access the property
 		_flip_footprint = !_flip_footprint
 		return _flip_footprint
 
+# When the player is next to a fire, this stores the reference to that fire
+# so that we could trigger refueling.
 var _nearby_fire: Fire
+
+# These will be needed to modify the darkness effect over time
+var _darkness_modulation_step: float
+
+# These will be needed to modify the blizzard effect over time
+var _blizzard_slant_step: float
+var _blizzard_base_rain_speed_step: float
+var _blizzard_additional_rain_speed_step: float
 
 @onready var player: Player = $Player
 @onready var terrain: TileMapLayer = $TerrainTileMapLayer
+@onready var darkness_effect: CanvasModulate = $DarknessEffect
 
 @onready var hud: HUD = $HUD
 
 @onready var warmth_timer: Timer = $WarmthTimer
 @onready var win_timer: Timer = $WinTimer
+@onready var blizzard_calming_timer: Timer = $BlizzardCalmingTimer
 
 @onready var blizzard_sfx: AudioStreamPlayer = $BlizzardSFX
 @onready var wood_pickup_sfx: AudioStreamPlayer = $WoodPickupSFX
+
+func _init() -> void:
+	_darkness_modulation_step = DAWN_FINAL_RGB_MODULATION / DAWN_START_TIME
+	
+	_blizzard_slant_step = (BLIZZARD_START_SLANT - BLIZZARD_CALM_SLANT) / BLIZZARD_CALM_TIME
+	_blizzard_base_rain_speed_step = (BLIZZARD_START_BASE_SPEED - BLIZZARD_CALM_BASE_SPEED) / BLIZZARD_CALM_TIME
+	_blizzard_additional_rain_speed_step = (BLIZZARD_START_ADDL_SPEED - BLIZZARD_CALM_ADDL_SPEED) / BLIZZARD_CALM_TIME
 
 func _ready() -> void:
 	# Initialize game state
 	_warmth = 100
 	_wood_count = 0
 	_matches_count = 3
-	_hours_left_to_win = 6
+	_time_left_to_win = GAME_LENGTH
 	
 	# Generate snow tiles
 	for x in range(-WORLD_WIDTH / 2, WORLD_WIDTH / 2):
@@ -88,7 +128,6 @@ func _on_warmth_timer_timeout():
 		_warmth += 1
 	else:
 		_warmth -= 1
-	_warmth = clamp(_warmth, 0, 100)
 	
 	if _warmth > 80:
 		hud.frost_shader.visible = false
@@ -104,7 +143,44 @@ func _on_warmth_timer_timeout():
 
 
 func _on_win_timer_timeout():
-	_hours_left_to_win -= 1
+	_time_left_to_win -= 1
+	
+	if _time_left_to_win < DAWN_START_TIME:
+		# The darkness is receding
+		var time := DAWN_START_TIME - _time_left_to_win
+		
+		darkness_effect.color.r = _darkness_modulation_step * time
+		darkness_effect.color.g = _darkness_modulation_step * time
+		darkness_effect.color.b = _darkness_modulation_step * time
+		
+		# Reduce the intensity of the light circling the player
+		# twice as fast as reducing the darkness modulation effect
+		player.light.color.a = max(
+				player.light.color.a - 2 * _darkness_modulation_step, 
+				0,
+		)
+	
+	if _time_left_to_win < BLIZZARD_CALM_TIME:
+		if blizzard_calming_timer.is_stopped():
+			blizzard_calming_timer.start()
+
+
+func _on_blizzard_calming_timer_timeout() -> void:
+	# The blizzard is dying down
+	var time := BLIZZARD_CALM_TIME - _time_left_to_win
+	
+	hud.snow_effect.material.set_shader_parameter(
+		"slant",
+		BLIZZARD_START_SLANT - _blizzard_slant_step * time,
+	)
+	hud.snow_effect.material.set_shader_parameter(
+		"base_rain_speed",
+		BLIZZARD_START_BASE_SPEED - _blizzard_base_rain_speed_step * time,
+	)
+	hud.snow_effect.material.set_shader_parameter(
+		"base_rain_speed",
+		BLIZZARD_START_ADDL_SPEED - _blizzard_additional_rain_speed_step * time,
+	)
 
 ## End Timers ##
 
