@@ -26,6 +26,7 @@ Be careful: once you're out of matches, you can't get more!
 - **WASD** or direction arrows to walk
 - **Spacebar** to refuel a nearby fire with 1 wood
 - **Enter** to create a new fire using up 1 match and 1 wood
+- **Esc** to pause the game
 
 ## Credits
 ### Art
